@@ -1,0 +1,80 @@
+replicaCount: 1
+revisionHistoryLimit: 10
+image:
+  repository: asia-docker.pkg.dev/skuad-core-prod/gke/acl
+  pullPolicy: IfNotPresent
+  tag: v2.2.4
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+secretsFrom: acl
+# Any Extra environment variables.
+extraEnv:
+  NODE_OPTIONS: --max_old_space_size=4096
+  NODE_ENV: production
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsUser: 0
+  readOnlyRootFilesystem: false
+
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  #runAsNonRoot: true
+  #runAsUser: 1000
+service:
+  type: ClusterIP
+  port: 3002
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: ui-storybook
+    networking.gke.io/managed-certificates: skuad-ui
+    networking.gke.io/v1beta1.FrontendConfig: skuad-ui
+  domains:
+    - acl.skuad.io
+  tls: []
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2048Mi
+  requests:
+    cpu: 100m
+    memory: 512Mi
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 60
+nodeSelector: {}
+tolerations: []
+affinity: {}
+istio:
+  internal:
+    gateway: istio-ingress/internal-ingress-gateway
+    domain: internal.skuad.io
+  external:
+    gateway: istio-ingress/istio-external-ingress
+    hosts:
+      - acl.skuad.io
+    http:
+      - match:
+          - uri:
+              prefix: /
+        route:
+          - destination:
+              port:
+                number: 3002
+              host: acl.apps.svc.cluster.local
+  

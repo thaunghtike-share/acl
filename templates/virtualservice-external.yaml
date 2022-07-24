@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "app.fullname" . }}-external
+spec:
+  gateways:
+    - {{ .Values.istio.external.gateway }}
+  hosts:
+    {{  range .Values.istio.external.hosts }}
+      - {{ toYaml . }}
+    {{ end }}
+  http:
+    {{- with .Values.istio.external.http }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
